@@ -120,6 +120,25 @@
     [[RACSignal interval:1 onScheduler:[RACScheduler schedulerWithPriority:(RACSchedulerPriorityDefault) name:@"ssssss"]]   subscribeNext:^(NSDate * _Nullable x) {
         NSLog(@"子线程:%@", [NSThread currentThread]);
     }];
+    
+    // 延时执行
+    // 五秒后执行一次
+    [[RACScheduler mainThreadScheduler] afterDelay:5 schedule:^{
+        
+        NSLog(@"五秒后执行一次");
+        
+    }];
+    
+    
+    // 定时执行
+    // 每隔两秒执行一次
+    // 这里要加takeUntil条件限制一下否则当控制器pop后依旧会执行 ﻿
+    // 每一秒执行一次,这里要加上释放信号,否则控制器推出后依旧会执行
+    [[[RACSignal interval:2 onScheduler:[RACScheduler mainThreadScheduler]] takeUntil:self.rac_willDeallocSignal] subscribeNext:^(id x) {
+        
+        NSLog(@"每两秒执行一次");
+        
+    }];
 }
 - (void)rac_createSignal{
     RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
